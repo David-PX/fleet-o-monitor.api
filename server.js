@@ -19,7 +19,7 @@ app.get("/", (req, res) => {
 sequelize
   .authenticate()
   .then(() => {
-    console.log("Connection has been established successfully.");
+    console.log("Database Connection has been established successfully.");
     app.listen(PORT, () => console.log(`🚀 Server running on ${PORT}`));
   })
   .catch((error) => console.error("❌ Error connecting to database:", error));
