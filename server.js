@@ -7,8 +7,8 @@ const { sequelize } = require("./src/models");
 
 // routes
 const vehicleRoutes = require("./src/routes/vehicles.routes");
-const rentRoutes = require("./routes/rents");
-const driverRoutes = require("./routes/drivers");
+const rentRoutes = require("./src/routes/rents.routes");
+const driverRoutes = require("./src/routes/drivers.routes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;

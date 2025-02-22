@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const { Rent, Vehicle, Driver } = require("../models");
 
 const getAllRents = async (req, res) => {
@@ -33,6 +34,33 @@ const getRentById = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+const getRentsByDriver = async (req, res) => {
+    try {
+      const { driverId } = req.params;
+      const { status } = req.query;
+  
+      const driver = await Driver.findByPk(driverId);
+      if (!driver) return res.status(404).json({ message: "Driver not found" });
+
+      const whereCondition = { driverId };
+      if (status) {
+        whereCondition.status = {
+            [Op.eq]: status,
+        };
+      }  
+  
+      const rents = await Rent.findAll({
+        where: whereCondition,
+        include: { model: Vehicle, as: "vehicle" },
+      });
+  
+      res.json(rents);
+    } catch (error) {
+      console.error("Error fetching rents for driver:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  };
 
 const createRent = async (req, res) => {
   try {
@@ -108,6 +136,7 @@ const cancelRent = async (req, res) => {
 module.exports = {
   getAllRents,
   getRentById,
+  getRentsByDriver,
   createRent,
   returnVehicle,
   cancelRent,
