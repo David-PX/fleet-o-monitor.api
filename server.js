@@ -9,6 +9,7 @@ const { sequelize } = require("./src/models");
 const vehicleRoutes = require("./src/routes/vehicles.routes");
 const rentRoutes = require("./src/routes/rents.routes");
 const driverRoutes = require("./src/routes/drivers.routes");
+const gpsRoutes = require("./src/routes/gps.routes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/rents", rentRoutes);
 app.use("/api/drivers", driverRoutes);
+app.use("/api/gps", gpsRoutes);
 
 app.get("/", (req, res) => {
   res.send("Fleet-o-monitor API is running...");
