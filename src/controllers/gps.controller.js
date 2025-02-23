@@ -1,7 +1,10 @@
 require("dotenv").config();
+const { io } = require("../../server");
 const createMessage = require("../services/twilio.service");
-const { Vehicle } = require("../models");
 
+// Models
+const { Vehicle } = require("../models");
+const { Alert } = require("../models");
 
 const shutDownVehicle = async (req, res) => {
   try {
@@ -45,7 +48,38 @@ const turnOnVehicle = async (req, res) => {
   }
 };
 
+const receiveNotification = async (req, res) => {
+    try {
+      const { From, Body } = req.body;
+      console.log(`Received From ${From}: ${Body}`);
+  
+      let alertType = "";
+      if (Body.toLowerCase().includes("low battery")) {
+        alertType = "Low Battery";
+      } else if (Body.toLowerCase().includes("power alarm")) {
+        alertType = "Power Off";
+      } else {
+        return res.status(400).json({ message: "Unknown alert type" });
+      }
+  
+      const alert = await Alert.create({
+        gpsNumber: From,
+        type: alertType,
+        message: Body,
+      });
+  
+      io.emit("new_alert", alert);
+  
+      res.json({ message: "Notification received successfully", alertType });
+    } catch (error) {
+      console.error("Error processing GPS alert:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  };
+
+
 module.exports = {
   shutDownVehicle,
-  turnOnVehicle
+  turnOnVehicle,
+  receiveNotification,
 };

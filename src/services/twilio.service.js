@@ -13,8 +13,8 @@ const createMessage = async (gpsNumber, message) => {
     });
 
     console.log(`Mensaje enviado con SID: ${response.sid}`);
-    console.log(response.body);
-    return response;
+
+    return {success: true, sid: response.id};
   } catch (error) {
     console.error("Error enviando mensaje con Twilio:", error.message);
     return { success: false, error: error.message };
