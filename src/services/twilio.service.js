@@ -1,4 +1,4 @@
-const twilio = require("twilio");
+const twilio = require('twilio');
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
@@ -14,9 +14,9 @@ const createMessage = async (gpsNumber, message) => {
 
     console.log(`Mensaje enviado con SID: ${response.sid}`);
 
-    return {success: true, sid: response.id};
+    return { success: true, sid: response.id };
   } catch (error) {
-    console.error("Error enviando mensaje con Twilio:", error.message);
+    console.error('Error enviando mensaje con Twilio:', error.message);
     return { success: false, error: error.message };
   }
 };
