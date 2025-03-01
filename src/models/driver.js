@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const Driver = sequelize.define("Driver", {
+  const Driver = sequelize.define('Driver', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     name: { type: DataTypes.STRING, allowNull: false },
     licenseNumber: { type: DataTypes.STRING, allowNull: false, unique: true },
@@ -8,8 +8,8 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Driver.associate = (models) => {
-    Driver.hasMany(models.Rent, { foreignKey: "driverId", as: "rents" });
+    Driver.hasMany(models.Rent, { foreignKey: 'driverId', as: 'rents' });
   };
 
   return Driver;
-}
+};
