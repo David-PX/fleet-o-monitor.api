@@ -1,10 +1,10 @@
 require("dotenv").config();
-const { io } = require("../../server");
 const createMessage = require("../services/twilio.service");
 
 // Models
 const { Vehicle } = require("../models");
 const { Alert } = require("../models");
+const { getIo } = require('../services/socket')
 
 const shutDownVehicle = async (req, res) => {
   try {
@@ -14,11 +14,12 @@ const shutDownVehicle = async (req, res) => {
     if (!vehicle) return res.status(404).json({ message: "Vehicle not found" });
     if (!vehicle.gpsNumber) return res.status(400).json({ message: "Vehicle does not have a GPS number" });
 
-    const response = await createMessage(vehicle.gpsNumber, "stop123456"); 
-
-    if (!response.success) {
-      return res.status(500).json({ message: "Failed to send SMS", error: response.error });
-    }
+    // TO DO: Uncomment this to send messages
+    // const response = await createMessage(vehicle.gpsNumber, "stop123456");
+    //
+    // if (!response.success) {
+    //   return res.status(500).json({ message: "Failed to send SMS", error: response.error });
+    // }
 
     res.json({ message: "Vehicle engine blocked successfully", sid: response.sid });
   } catch (error) {
@@ -35,11 +36,11 @@ const turnOnVehicle = async (req, res) => {
     if (!vehicle) return res.status(404).json({ message: "Vehicle not found" });
     if (!vehicle.gpsNumber) return res.status(400).json({ message: "Vehicle does not have a GPS number" });
 
-    const response = await createMessage(vehicle.gpsNumber, "resume123456");
-
-    if (!response.success) {
-      return res.status(500).json({ message: "Failed to send SMS", error: response.error });
-    }
+    // const response = await createMessage(vehicle.gpsNumber, "resume123456");
+    //
+    // if (!response.success) {
+    //   return res.status(500).json({ message: "Failed to send SMS", error: response.error });
+    // }
 
     res.json({ message: "Vehicle engine unblocked successfully", sid: response.sid });
   } catch (error) {
@@ -67,9 +68,10 @@ const receiveNotification = async (req, res) => {
         type: alertType,
         message: Body,
       });
-  
-      io.emit("new_alert", alert);
-  
+
+      const io = getIo();
+      io.emit("new_alert", { msg: alert });
+
       res.json({ message: "Notification received successfully", alertType });
     } catch (error) {
       console.error("Error processing GPS alert:", error);

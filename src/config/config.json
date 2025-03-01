@@ -5,6 +5,7 @@
     "database": "fleet-o-monitor.db",
     "host": "127.0.0.1",
     "port": "5434",
-    "dialect": "postgres"
+    "dialect": "postgres",
+    "use_env_variable": true
   }
 }
