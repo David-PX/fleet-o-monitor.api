@@ -12,10 +12,10 @@ module.exports = (sequelize, DataTypes) => {
     },
   });
 
-  Rent.associate = (models) => {
-    Rent.belongsTo(models.Vehicle, { foreignKey: 'vehicleId', as: 'vehicle' });
-    Rent.belongsTo(models.Driver, { foreignKey: 'driverId', as: 'driver' });
-  };
+  // Rent.associate = (models) => {
+  //   Rent.belongsTo(models.Vehicle, { foreignKey: 'vehicleId', as: 'vehicle' });
+  //   Rent.belongsTo(models.Driver, { foreignKey: 'driverId', as: 'driver' });
+  // };
 
   return Rent;
 };

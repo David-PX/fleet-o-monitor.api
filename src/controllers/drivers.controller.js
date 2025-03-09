@@ -1,8 +1,8 @@
-const { Driver, Rent } = require('../models');
+const { Driver } = require('../models');
 
 const getAllDrivers = async (req, res) => {
   try {
-    const drivers = await Driver.findAll({ include: { model: Rent, as: 'rents' } });
+    const drivers = await Driver.findAll();
     res.json(drivers);
   } catch (error) {
     console.error('Error fetching drivers:', error);
@@ -13,7 +13,7 @@ const getAllDrivers = async (req, res) => {
 const getDriverById = async (req, res) => {
   try {
     const { id } = req.params;
-    const driver = await Driver.findByPk(id, { include: { model: Rent, as: 'rents' } });
+    const driver = await Driver.findByPk(id);
 
     if (!driver) return res.status(404).json({ message: 'Driver not found' });
 

@@ -8,6 +8,7 @@ const { initializeSocket, getIo } = require('./src/services/socket');
 
 // sequelize orm
 const { sequelize } = require('./src/models');
+const { seedGPSModels } = require('./src/seeders/seed');
 
 // routes
 const vehicleRoutes = require('./src/routes/vehicles.routes');
@@ -15,6 +16,7 @@ const rentRoutes = require('./src/routes/rents.routes');
 const driverRoutes = require('./src/routes/drivers.routes');
 const gpsRoutes = require('./src/routes/gps.routes');
 const twilioRoutes = require('./src/routes/twilio.routes');
+const gpsModelRoutes = require('./src/routes/gps-model.routes');
 const createMessage = require('./src/services/twilio.service');
 
 const app = express();
@@ -26,31 +28,29 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Routes configuration
 app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/rents', rentRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/gps', gpsRoutes);
 app.use('/api/twilio', twilioRoutes);
+app.use('/api/gps-models', gpsModelRoutes);
 
-// Entry Point
 app.get('/', async (req, res) => {
   const io = getIo();
   io.emit('mensaje', { msg: 'Hello from server!' });
-  const response = await createMessage('+18296423371', 'HOLA');
+  const response = await createMessage('+18492202181', 'HOLA');
   res.send('Fleet-o-monitor API is running...');
 });
 
-// Database Connection initialization
 sequelize
   .sync({ alter: true })
   .then(() => {
     console.log('Database Connection has been established successfully.');
-    server.listen(PORT, () => {
+    server.listen(PORT, async () => {
       console.log(`🚀 Server running on ${PORT}`);
+      await seedGPSModels();
       initializeSocket(server);
 
-      // TO DO: Delete this line, its only for testing
       const io = getIo();
       setInterval(() => {
         const latitude = -69.8941572163946;

@@ -2,25 +2,27 @@ require('dotenv').config();
 const createMessage = require('../services/twilio.service');
 
 // Models
-const { Vehicle } = require('../models');
-const { Alert } = require('../models');
+const { Vehicle, GpsAlert, GPSModel } = require('../models');
 const { getIo } = require('../services/socket');
 
 const shutDownVehicle = async (req, res) => {
   try {
     const { vehicleId } = req.params;
 
-    const vehicle = await Vehicle.findByPk(vehicleId);
+    const vehicle = await Vehicle.findByPk(vehicleId, { include: 'gpsModel' });
     if (!vehicle) return res.status(404).json({ message: 'Vehicle not found' });
     if (!vehicle.gpsNumber)
       return res.status(400).json({ message: 'Vehicle does not have a GPS number' });
+    if (!vehicle.gpsModel)
+      return res.status(400).json({ message: 'Vehicle does not have an assigned GPS model' });
 
-    // TO DO: Uncomment this to send messages
-    // const response = await createMessage(vehicle.gpsNumber, "stop123456");
-    //
-    // if (!response.success) {
-    //   return res.status(500).json({ message: "Failed to send SMS", error: response.error });
-    // }
+    const command = vehicle.gpsModel.stopCommand;
+
+    const response = await createMessage(vehicle.gpsNumber, command);
+
+    if (!response.success) {
+      return res.status(500).json({ message: 'Failed to send SMS', error: response.error });
+    }
 
     res.json({ message: 'Vehicle engine blocked successfully', sid: response.sid });
   } catch (error) {
@@ -33,16 +35,21 @@ const turnOnVehicle = async (req, res) => {
   try {
     const { vehicleId } = req.params;
 
-    const vehicle = await Vehicle.findByPk(vehicleId);
+    const vehicle = await Vehicle.findByPk(vehicleId, { include: 'gpsModel' });
     if (!vehicle) return res.status(404).json({ message: 'Vehicle not found' });
     if (!vehicle.gpsNumber)
       return res.status(400).json({ message: 'Vehicle does not have a GPS number' });
 
-    // const response = await createMessage(vehicle.gpsNumber, "resume123456");
-    //
-    // if (!response.success) {
-    //   return res.status(500).json({ message: "Failed to send SMS", error: response.error });
-    // }
+    if (!vehicle.gpsModel)
+      return res.status(400).json({ message: 'Vehicle does not have an assigned GPS model' });
+
+    const command = vehicle.gpsModel.resumeCommand;
+
+    const response = await createMessage(vehicle.gpsNumber, command);
+
+    if (!response.success) {
+      return res.status(500).json({ message: 'Failed to send SMS', error: response.error });
+    }
 
     res.json({ message: 'Vehicle engine unblocked successfully', sid: response.sid });
   } catch (error) {
@@ -51,21 +58,96 @@ const turnOnVehicle = async (req, res) => {
   }
 };
 
+const setSpeedAlert = async (req, res) => {
+  try {
+    const { vehicleId } = req.params;
+    const { speedLimit } = req.body; // Velocidad en km/h
+
+    const vehicle = await Vehicle.findByPk(vehicleId, { include: 'gpsModel' });
+
+    if (!vehicle) return res.status(404).json({ message: 'Vehicle not found' });
+    if (!vehicle.gpsNumber)
+      return res.status(400).json({ message: 'Vehicle does not have a GPS number' });
+    if (!vehicle.gpsModel)
+      return res.status(400).json({ message: 'Vehicle does not have an assigned GPS model' });
+
+    // Comando de alerta de velocidad personalizado
+    const command = vehicle.gpsModel.speedAlertCommand.replace(
+      '080',
+      speedLimit.toString().padStart(3, '0'),
+    );
+
+    const response = await createMessage(vehicle.gpsNumber, command);
+
+    if (!response.success) {
+      return res.status(500).json({ message: 'Failed to send SMS', error: response.error });
+    }
+
+    res.json({ message: `Speed alert set to ${speedLimit} km/h successfully`, sid: response.sid });
+  } catch (error) {
+    console.error('Error setting speed alert:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const getDoorStatus = async (req, res) => {
+  try {
+    const { vehicleId } = req.params;
+
+    const vehicle = await Vehicle.findByPk(vehicleId, { include: 'gpsModel' });
+
+    if (!vehicle) return res.status(404).json({ message: 'Vehicle not found' });
+    if (!vehicle.gpsNumber)
+      return res.status(400).json({ message: 'Vehicle does not have a GPS number' });
+    if (!vehicle.gpsModel)
+      return res.status(400).json({ message: 'Vehicle does not have an assigned GPS model' });
+
+    const command = vehicle.gpsModel.doorStatusCommand;
+
+    const response = await createMessage(vehicle.gpsNumber, command);
+
+    if (!response.success) {
+      return res.status(500).json({ message: 'Failed to send SMS', error: response.error });
+    }
+
+    res.json({ message: 'Door status request sent successfully', sid: response.sid });
+  } catch (error) {
+    console.error('Error requesting door status:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 const receiveNotification = async (req, res) => {
   try {
     const { From, Body } = req.body;
-    console.log(`Received From ${From}: ${Body}`);
+    console.log(`Received From ${From}: ${Body.toLowerCase()}`);
 
+    const vehicle = await Vehicle.findOne({ where: { gpsNumber: From }, include: 'gpsModel' });
+
+    if (!vehicle) return res.status(404).json({ message: 'Vehicle not found' });
+    if (!vehicle.gpsModel)
+      return res.status(400).json({ message: 'Vehicle does not have an assigned GPS model' });
+
+    const { gpsModel } = vehicle;
     let alertType = '';
-    if (Body.toLowerCase().includes('low battery')) {
+
+    if (Body.toLowerCase().includes(gpsModel.lowBatteryMessage)) {
       alertType = 'Low Battery';
-    } else if (Body.toLowerCase().includes('power alarm')) {
+    } else if (Body.toLowerCase().includes(gpsModel.powerOffMessage.toLowerCase())) {
       alertType = 'Power Off';
+    } else if (Body.toLowerCase().includes(gpsModel.ignitionOnMessage.toLowerCase())) {
+      alertType = 'Ignition On';
+    } else if (Body.toLowerCase().includes(gpsModel.ignitionOffMessage.toLowerCase())) {
+      alertType = 'Ignition Off';
+    } else if (Body.toLowerCase().includes('speed')) {
+      alertType = 'Over Speeding';
+    } else if (Body.toLowerCase().includes(gpsModel.doorStatusCommand.toLowerCase())) {
+      alertType = 'Door Status Changed';
     } else {
       return res.status(400).json({ message: 'Unknown alert type' });
     }
 
-    const alert = await Alert.create({
+    const alert = await GpsAlert.create({
       gpsNumber: From,
       type: alertType,
       message: Body,
@@ -84,5 +166,7 @@ const receiveNotification = async (req, res) => {
 module.exports = {
   shutDownVehicle,
   turnOnVehicle,
+  setSpeedAlert,
+  getDoorStatus,
   receiveNotification,
 };

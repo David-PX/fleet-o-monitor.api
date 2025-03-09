@@ -7,11 +7,26 @@ module.exports = (sequelize, DataTypes) => {
     vin: { type: DataTypes.STRING, allowNull: false, unique: true },
     fuelType: { type: DataTypes.STRING, allowNull: false },
     available: { type: DataTypes.BOOLEAN, defaultValue: true },
+
     gpsNumber: { type: DataTypes.STRING, allowNull: true, unique: true },
+    gpsModelId: { type: DataTypes.INTEGER, allowNull: true },
+
+    driverId: { type: DataTypes.INTEGER, allowNull: true },
+    isOn: { type: DataTypes.BOOLEAN, defaultValue: true },
+    batteryLevel: { type: DataTypes.INTEGER, defaultValue: 100 },
+    lastUpdate: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+    latitude: { type: DataTypes.FLOAT, allowNull: true },
+    longitude: { type: DataTypes.FLOAT, allowNull: true },
   });
 
+  // TODO: UNCOMMENT THIS CODE WHEN RENTS ARE IMPLEMENTED
+  // Vehicle.associate = (models) => {
+  //   Vehicle.hasMany(models.Rent, { foreignKey: 'vehicleId', as: 'rents' });
+  // };
+
   Vehicle.associate = (models) => {
-    Vehicle.hasMany(models.Rent, { foreignKey: 'vehicleId', as: 'rents' });
+    Vehicle.belongsTo(models.GPSModel, { foreignKey: 'gpsModelId', as: 'gpsModel' });
+    Vehicle.belongsTo(models.Driver, { foreignKey: 'driverId', as: 'driver' });
   };
 
   return Vehicle;

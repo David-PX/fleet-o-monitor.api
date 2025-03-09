@@ -7,9 +7,9 @@ module.exports = (sequelize, DataTypes) => {
     email: { type: DataTypes.STRING, allowNull: true, unique: true },
   });
 
-  Driver.associate = (models) => {
-    Driver.hasMany(models.Rent, { foreignKey: 'driverId', as: 'rents' });
-  };
+  // Driver.associate = (models) => {
+  //   Driver.hasMany(models.Rent, { foreignKey: 'driverId', as: 'rents' });
+  // };
 
   return Driver;
 };

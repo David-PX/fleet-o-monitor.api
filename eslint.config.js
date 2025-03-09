@@ -11,6 +11,12 @@ module.exports = [
       prettier: require('eslint-plugin-prettier'),
     },
     rules: {
+      'prettier/prettier': [
+        'error',
+        {
+          endOfLine: 'auto',
+        },
+      ],
       quotes: ['error', 'single'],
       semi: ['error', 'always'],
       indent: ['error', 2],

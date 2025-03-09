@@ -1,4 +1,4 @@
-const { Vehicle } = require('../models');
+const { Vehicle, GPSModel, Driver } = require('../models');
 
 const getAllVehicles = async (req, res) => {
   try {
@@ -25,7 +25,19 @@ const getVehicleById = async (req, res) => {
 
 const createVehicle = async (req, res) => {
   try {
-    const { make, model, plate, vin, fuelType, available, gpsNumber } = req.body;
+    const { make, model, plate, vin, fuelType, available, gpsNumber, gpsModelId, driverId } =
+      req.body;
+
+    if (gpsModelId) {
+      const gpsModel = await GPSModel.findByPk(gpsModelId);
+      if (!gpsModel) return res.status(404).json({ message: 'GPS model not found' });
+    }
+
+    if (driverId) {
+      const driver = await Driver.findByPk(driverId);
+      if (!driver) return res.status(404).json({ message: 'Driver not found' });
+    }
+
     const newVehicle = await Vehicle.create({
       make,
       model,
@@ -34,6 +46,13 @@ const createVehicle = async (req, res) => {
       fuelType,
       available,
       gpsNumber,
+      gpsModelId,
+      driverId,
+      isOn: false,
+      batteryLevel: 100,
+      lastUpdate: new Date(),
+      latitude: null,
+      longitude: null,
     });
 
     res.status(201).json(newVehicle);
@@ -48,6 +67,11 @@ const updateVehicle = async (req, res) => {
     const { id } = req.params;
     const vehicle = await Vehicle.findByPk(id);
     if (!vehicle) return res.status(404).json({ message: 'Vehicle not found' });
+
+    if (req.body.driverId) {
+      const driver = await Driver.findByPk(req.body.driverId);
+      if (!driver) return res.status(404).json({ message: 'Driver not found' });
+    }
 
     await vehicle.update(req.body);
     res.json({ message: 'Vehicle updated successfully', vehicle });
