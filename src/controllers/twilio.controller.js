@@ -1,5 +1,50 @@
 const { getIo } = require('../services/socket');
 const { v4: uuidv4 } = require('uuid');
+const { createMessage, getCarrier, createCall } = require('../services/twilio.service');
+
+const whatever = async (req, res) => {
+  try {
+    const { phoneNumber } = req.body;
+    const response = await getCarrier(phoneNumber);
+    res.status(200).json({ ok: true, message: 'success', data: response });
+  } catch (error) {
+    console.error('Error on sending message: ', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const messageStatus = async (req, res) => {
+  try {
+    console.log(req.body);
+    res.set('Content-Type', 'text/xml');
+    res.send('<Response><Message>Recibido tu mensaje</Message></Response>');
+  } catch (error) {
+    console.error('Error on sending message: ', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const sendMessage = async (req, res) => {
+  try {
+    const { phoneNumber, message } = req.body;
+    const response = await createMessage(phoneNumber, message, true);
+    res.status(200).json({ ok: true, message: 'success', data: response });
+  } catch (error) {
+    console.error('Error on sending message: ', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const makeCall = async (req, res) => {
+  try {
+    const { phoneNumber } = req.body;
+    const response = await createCall(phoneNumber);
+    res.status(200).json({ ok: true, message: 'success', data: response });
+  } catch (error) {
+    console.error('Error on calling: ', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 
 const webhook = async (req, res) => {
   try {
@@ -54,4 +99,8 @@ const webhookException = async (req, res) => {
 module.exports = {
   webhook,
   webhookException,
+  sendMessage,
+  whatever,
+  messageStatus,
+  makeCall,
 };
