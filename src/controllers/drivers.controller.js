@@ -30,6 +30,8 @@ const createDriver = async (req, res) => {
 
     const newDriver = await Driver.create({ name, licenseNumber, phone, email });
 
+    console.log('newDriver', newDriver);
+
     res.status(201).json(newDriver);
   } catch (error) {
     console.error('Error creating driver:', error);

@@ -133,15 +133,15 @@ const receiveNotification = async (req, res) => {
 
     if (Body.toLowerCase().includes(gpsModel.lowBatteryMessage)) {
       alertType = 'Low Battery';
-    } else if (Body.toLowerCase().includes(gpsModel.powerOffMessage.toLowerCase())) {
+    } else if (Body.toLowerCase().includes('power off')) {
       alertType = 'Power Off';
-    } else if (Body.toLowerCase().includes(gpsModel.ignitionOnMessage.toLowerCase())) {
+    } else if (Body.toLowerCase().includes(gpsModel.ignitionOnMessage)) {
       alertType = 'Ignition On';
-    } else if (Body.toLowerCase().includes(gpsModel.ignitionOffMessage.toLowerCase())) {
+    } else if (Body.toLowerCase().includes(gpsModel.ignitionOffMessage)) {
       alertType = 'Ignition Off';
     } else if (Body.toLowerCase().includes('speed')) {
       alertType = 'Over Speeding';
-    } else if (Body.toLowerCase().includes(gpsModel.doorStatusCommand.toLowerCase())) {
+    } else if (Body.toLowerCase().includes(gpsModel.doorStatusCommand)) {
       alertType = 'Door Status Changed';
     } else {
       return res.status(400).json({ message: 'Unknown alert type' });
