@@ -1,5 +1,5 @@
 require('dotenv').config();
-const createMessage = require('../services/twilio.service');
+const { createMessage } = require('../services/twilio.service');
 
 // Models
 const { Vehicle, GpsAlert, GPSModel } = require('../models');
