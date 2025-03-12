@@ -38,6 +38,10 @@ const createVehicle = async (req, res) => {
       if (!driver) return res.status(404).json({ message: 'Driver not found' });
     }
 
+    // const makeC = 'ABC'
+
+    gpsNumberNew = gpsNumber ?? '+18493166671';
+
     const newVehicle = await Vehicle.create({
       make,
       model,
@@ -45,7 +49,7 @@ const createVehicle = async (req, res) => {
       vin,
       fuelType,
       available,
-      gpsNumber,
+      gpsNumber: gpsNumberNew,
       gpsModelId,
       driverId,
       isOn: false,
@@ -54,6 +58,8 @@ const createVehicle = async (req, res) => {
       latitude: null,
       longitude: null,
     });
+
+    console.log('newVehicle', newVehicle);
 
     res.status(201).json(newVehicle);
   } catch (error) {

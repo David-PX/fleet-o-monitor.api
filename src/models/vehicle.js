@@ -3,12 +3,12 @@ module.exports = (sequelize, DataTypes) => {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     make: { type: DataTypes.STRING, allowNull: false },
     model: { type: DataTypes.STRING, allowNull: false },
-    plate: { type: DataTypes.STRING, allowNull: false, unique: true },
-    vin: { type: DataTypes.STRING, allowNull: false, unique: true },
+    plate: { type: DataTypes.STRING, allowNull: false, unique: false },
+    vin: { type: DataTypes.STRING, allowNull: false, unique: false },
     fuelType: { type: DataTypes.STRING, allowNull: false },
     available: { type: DataTypes.BOOLEAN, defaultValue: true },
 
-    gpsNumber: { type: DataTypes.STRING, allowNull: true, unique: true },
+    gpsNumber: { type: DataTypes.STRING, allowNull: true, unique: false },
     gpsModelId: { type: DataTypes.INTEGER, allowNull: true },
 
     driverId: { type: DataTypes.INTEGER, allowNull: true },
