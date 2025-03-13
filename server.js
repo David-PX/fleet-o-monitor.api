@@ -47,7 +47,7 @@ sequelize
     console.log('Database Connection has been established successfully.');
     server.listen(PORT, async () => {
       console.log(`🚀 Server running on ${PORT}`);
-      // await seedGPSModels();
+      await seedGPSModels();
       initializeSocket(server);
 
       const routeCoordinates = [

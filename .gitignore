@@ -34,7 +34,7 @@ db-data/
 
 # Sequelize migration logs
 migrations/
-seeders/
+
 
 # Local PostgreSQL dumps
 *.sql
